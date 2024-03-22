@@ -62,7 +62,7 @@ void CameraViewport::SetView(Quaternion Origin,int Width, int Height, float FOV,
     this->unitUp = Up * tan(FOV/2);
 }
 
-__global__ void rayTraceKernel(CameraViewport* View, uint32_t* screenBuffer, Triangle* renderable, int RenderableCount, PointLight* lights, int lightCount, Vec3 CFramePos, int MaxDist, int maxBounces, float ambience,float shadow) {
+__global__ void rayTraceKernel(CameraViewport* View, uint32_t* screenBuffer, Triangle* renderable, int RenderableCount, PointLight* lights, int lightCount, Vec3 CFramePos, int MaxDist, int maxBounces, float ambience) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int screenWidth = View->Width;
     int screenHeight = View->Height;
@@ -74,7 +74,10 @@ __global__ void rayTraceKernel(CameraViewport* View, uint32_t* screenBuffer, Tri
 
     Vec3 newPos = View->Origin.getPos() + View->unitRight * (2*((X+0.5)/screenWidth) - 1) + View->unitUp * (1 - 2*((Y+0.5)/screenHeight)) + View->Origin.getLookVector();
     Ray RenderRay = Ray(View->Origin.getPos() , (newPos - View->Origin.getPos() ).unitVector());
-    float Intensity = ambience;
+    Color3 Transmit = Color3(0,0,0);
+    float LightDistance = 0;
+    float Intensity = 0;
+    float LightContribution = 1;
 
     Triangle* CurrTri = nullptr;
     Triangle* LastTri = nullptr;
@@ -95,17 +98,16 @@ __global__ void rayTraceKernel(CameraViewport* View, uint32_t* screenBuffer, Tri
                 CurrTri = &renderable[i];
             }
         }
+        LightDistance+= maxed;
 
-        LastTri = CurrTri;
-        
         if (CurrTri != nullptr) {
+            LastTri = CurrTri;
             RenderRay = Ray(RenderRay.getPosAtDist(maxed), (RenderRay.getDirection() - CurrTri->getNorm()*2.0f*CurrTri->getNorm().dot(RenderRay.getDirection())).unitVector());
-        } else {
-            Ray OldRay = RenderRay;
 
+            bool HasLighting = false;
             for (int i = 0; i < lightCount; i++) {
                 PointLight light = lights[i];
-                RenderRay = Ray(RenderRay.getPos(), (light.Pos-RenderRay.getPos()));
+                Ray TempRenderRay = Ray(RenderRay.getPos(), (light.Pos-RenderRay.getPos()).unitVector());
 
                 // Shadow Calculations
                 bool NotHit = true;
@@ -113,63 +115,32 @@ __global__ void rayTraceKernel(CameraViewport* View, uint32_t* screenBuffer, Tri
                     if (LastTri == &renderable[i]) {
                         continue;
                     }
-                    RayIntersectResult Res = renderable[i].rayIntersect(RenderRay);
-                    if (Res.hit && Res.t > EPSILON) {
+                    RayIntersectResult Res = renderable[i].rayIntersect(TempRenderRay);
+                    if (Res.hit && Res.t > EPSILON && Res.t < (light.Pos-TempRenderRay.getPos()).magnitude()) {
                         NotHit = false;
                         break;
                     }
                 }
                 if (NotHit) {
-                    Intensity = min(max((light.Pos-OldRay.getPos()).unitVector().dot(OldRay.Dir), 0.0f) + Intensity, 1.0f);
-                } else {
-                    Intensity = shadow;
+                    HasLighting = true;
+                    Vec3 LightToHit = (light.Pos-TempRenderRay.getPos());
+                    float LightVal = max(LightToHit.unitVector().dot(LastTri->getNorm()), 0.0f);
+                    Intensity = min(Intensity+ (1-(LightDistance+LightToHit.magnitude())/MaxDist) * LightContribution * LightVal,1.0f);
+
+                    Transmit += light.Color * CurrTri->getMaterial().Specularity * LightContribution * pow(LightVal,16);
                 }
-
-
             }
-            screenBuffer[index] = (CurrTri != nullptr) ? CurrTri->getColor().toUint32( Intensity ) : 0x000000FF;
+            Transmit += CurrTri->getColor() * max((LightContribution-CurrTri->getMaterial().Reflectivity),0.0f) * max((1-LightDistance/MaxDist),0.0f);
+            LightContribution = max((LightContribution+CurrTri->getMaterial().Reflectivity-1),0.0f);
         }
     }
-    
-    if (CurrTri != nullptr) {
-
-        Ray OldRay = RenderRay;
-        bool NotHit = true;
-
-        for (int i = 0; i < lightCount; i++) {
-            PointLight light = lights[i];
-            RenderRay = Ray(RenderRay.getPos(), (light.Pos-RenderRay.getPos()));
-
-            // Shadow Calculations
-            NotHit = true;
-            for (int i = 0; i < RenderableCount; i++) {
-                if (LastTri == &renderable[i]) {
-                    continue;
-                }
-                RayIntersectResult Res = renderable[i].rayIntersect(RenderRay);
-                if (Res.hit && Res.t > EPSILON) {
-                    NotHit = false;
-                    break;
-                }
-            }
-            if (NotHit) { //CHANGE LATER
-                Intensity = min(max((light.Pos-OldRay.getPos()).unitVector().dot(OldRay.Dir), 0.0f) + Intensity, 1.0f);
-            } else {
-                Intensity = shadow;
-            }
-
-
-        }
-        screenBuffer[index] = (CurrTri != nullptr) ? CurrTri->getColor().toUint32( Intensity ) : 0x000000FF;
-    } 
-    
+    screenBuffer[index] = (LastTri != nullptr) ? Transmit.toUint32(min(max(Intensity+ambience,0.0f),1.0f)) : 0x000000FF;
 }
 
 // Temporary 
-#define MAXDIST 200
-#define AMBIENT 0.25
-#define SHADOW 0.1
-#define MAXBOUNCES 1
+#define MAXDIST 60
+#define AMBIENT 0.1
+#define MAXBOUNCES 5
 #define THREADSPERBLOCK 512
 
 void Camera::raytrace(Viewport& screen) {
@@ -195,7 +166,7 @@ void Camera::raytrace(Viewport& screen) {
     int threadsPerBlock = THREADSPERBLOCK; 
     int blocks = (bufferSize + threadsPerBlock - 1) / threadsPerBlock;
 
-    rayTraceKernel<<<blocks, threadsPerBlock>>>(CamView, screenBuffer, Tris, TriList.second, Lights, LightList.second, this->CFrame.getPos(), MAXDIST, MAXBOUNCES,AMBIENT, SHADOW);
+    rayTraceKernel<<<blocks, threadsPerBlock>>>(CamView, screenBuffer, Tris, TriList.second, Lights, LightList.second, this->CFrame.getPos(), MAXDIST, MAXBOUNCES,AMBIENT);
 
     cudaDeviceSynchronize();
 

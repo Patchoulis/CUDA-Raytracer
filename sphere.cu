@@ -1,19 +1,8 @@
-#include "triangle.h"
+#include "sphere.h"
 #include <cmath>
 #include <iostream>
 
-__host__ __device__ Triangle::Triangle(Vec3 p1,Vec3 p2,Vec3 p3, Material material) : lp1(p1),lp2(p2),lp3(p3), p1(p1), p2(p2), p3(p3), material(material), norm(this->calcNorm()) {}
-
-__host__ __device__ Triangle::Triangle(Vec3 lp1,Vec3 lp2,Vec3 lp3, Quaternion CFrame, Material material) : lp1(lp1),lp2(lp2),lp3(lp3),
- p1(CFrame.getPos()+CFrame.getRightVector()*lp1.getX()+CFrame.getUpVector()*lp1.getY()-CFrame.getLookVector()*lp1.getZ()),
- p2(CFrame.getPos()+CFrame.getRightVector()*lp2.getX()+CFrame.getUpVector()*lp2.getY()-CFrame.getLookVector()*lp2.getZ()),
- p3(CFrame.getPos()+CFrame.getRightVector()*lp3.getX()+CFrame.getUpVector()*lp3.getY()-CFrame.getLookVector()*lp3.getZ()), material(material), norm(this->calcNorm()) {}
-
-__host__ __device__ Vec3 Triangle::calcNorm() const {
-    Vec3 borderOne = p3 - p1;
-    Vec3 borderTwo = p3 - p2;
-    return borderOne.cross(borderTwo).unitVector();
-}
+__host__ __device__ Sphere::Sphere(Vec3 Pos, Material material) : Pos(Pos), material(material) {}
 
 __host__ __device__ Vec3 Triangle::calcNorm(Vec3 Center) const {
     Vec3 borderOne = this->p3 - this->p1;
