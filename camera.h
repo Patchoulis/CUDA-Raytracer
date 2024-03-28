@@ -1,5 +1,6 @@
 #include "quaternion.h"
 #include "world.h"
+#include "BVH.h"
 #include "viewport.h"
 
 #pragma once
@@ -9,6 +10,7 @@ class CameraViewport {
         Quaternion Origin;
         int Width, Height;
         Vec3 unitRight,unitUp;
+        float* AnglePowerMap;
 
         CameraViewport(Quaternion Origin,int Width, int Height, float FOV, int fromOrigin);
         void SetView(Quaternion Origin,int Width, int Height, float FOV, int fromOrigin);

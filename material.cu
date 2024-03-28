@@ -1,7 +1,7 @@
 #include "material.h"
 
-Material::Material(Color3 color, float specularity, float Refractivity, float Reflectivity, float Transparency) : color(color), Specularity(specularity), Refractivity(Refractivity),
-     Reflectivity(Reflectivity), Transparency(Transparency) {}
+Material::Material(Color3 color, Vec3 Albedo = Vec3(0,0,0), Vec3 Emissivity = Vec3(0,0,0), Vec3 Reflectivity = Vec3(0,0,0), float Roughness = 0) : color(color), Albedo(Albedo), Emissivity(Emissivity),
+     Reflectivity(Reflectivity), Roughness(Roughness) {}
 
 __host__ __device__ const Color3& Material::getColor() const {
     return this->color;

@@ -13,20 +13,18 @@ int main(int argc, char* argv[]) {
         std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
         return -1;
     }
+
     Viewport screen = Viewport(1000,1000,"Engine");
     
     Object Cuboid = makeCuboid(Vec3(3,3,3),Quaternion(Vec3(0,10,-5)));
-    Object Cuboid2 = makeCuboid(Vec3(3,3,3),Quaternion(Vec3(5,0,3)),Material(Color3(0,0,255),0.3,0,0.8));
-    Object Cuboid3 = makeCuboid(Vec3(3,3,3),Quaternion(Vec3(0,0,5)),Material(Color3(255,0,255),1,0,0.4));
-    Object BasePlate = makeCuboid(Vec3(25,1,25),Quaternion(Vec3(0,-1.5,0)),Material(Color3(255,200,255),0.0,0,0.05));
-    World world = World(std::vector<Object> {Cuboid,Cuboid3,Cuboid2, BasePlate});
-    PointLight light = PointLight(Vec3(0,1,0));
+    Object Cuboid2 = makeCuboid(Vec3(3,3,3),Quaternion(Vec3(5,0,3)), Material(Color3(0,0,255)));
+    Object Cuboid3 = makeCuboid(Vec3(3,3,3),Quaternion(Vec3(0,0,5)), Material(Color3(255,0,255)));
+    Object BasePlate = makeCuboid(Vec3(25,1,25),Quaternion(Vec3(0,-1.5,0)), Material(Color3(255,200,255)));
     PointLight light2 = PointLight(Vec3(2,5,0));
 
-    world.AddPointLight(light);
-    world.AddPointLight(light2);
+    World world = World(std::vector<Object> {Cuboid,Cuboid3,Cuboid2, BasePlate}, std::vector<PointLight> {light2});
 
-    Camera cam = Camera(&world, Quaternion(Vec3(0,0,0)),1000,1000,2, M_PI/4);
+    Camera cam = Camera(&world, Quaternion(Vec3(1,1,1)),1000,1000,2, M_PI/4);
     User user = User(cam, screen);
 
     bool quit = false;
