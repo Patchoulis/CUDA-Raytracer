@@ -14,4 +14,4 @@ class Object {
         void setPos(Vec3 Pos);
 };
 
-Object makeCuboid(Vec3 Size, Quaternion CFrame, Material material = Material(Color3(200,200,200)));
+Object makeCuboid(Vec3 Size, Quaternion CFrame, Material material = Material(Vec3(200,200,200)));

@@ -70,18 +70,6 @@ __host__ __device__ float Triangle::getMaxZ() const {
     return max(this->p3.getZ(),max(this->p1.getZ(),this->p2.getZ()));
 }
 
-__host__ __device__ const Color3& Triangle::getColor() const {
-    return this->material.getColor();
-}
-
-__host__ __device__ void Triangle::setColor(uint8_t r, uint8_t g, uint8_t b) {
-    this->material.setColor(r,g,b);
-}
-
-__host__ __device__ void Triangle::setColor(Color3 color) {
-    this->material.setColor(color);
-}
-
 __host__ __device__ const Material& Triangle::getMaterial() const {
     return this->material;
 }

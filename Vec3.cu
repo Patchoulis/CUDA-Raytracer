@@ -152,3 +152,10 @@ __host__ __device__ void Vec3::setY(float y) {
 __host__ __device__ void Vec3::setZ(float z) {
     this->z = z;
 }
+
+__host__ __device__ uint32_t Vec3::toUint32() const {
+    uint32_t x = static_cast<uint8_t>(max(0.0f,min(255.0f,this->x)));
+    uint32_t y = static_cast<uint8_t>(max(0.0f,min(255.0f,this->y)));
+    uint32_t z = static_cast<uint8_t>(max(0.0f,min(255.0f,this->z)));
+    return (x << 24) | (y << 16) | (z << 8) | static_cast<uint32_t>(255);
+}

@@ -16,12 +16,9 @@ class Triangle {
         __host__ __device__ Vec3 calcNorm(Vec3 Center) const;
         __host__ __device__ Vec3 calcCentroid() const;
     public:
-        __host__ __device__ Triangle(Vec3 p1,Vec3 p2,Vec3 p3, Material material = Material(Color3(200,200,200)));
-        __host__ __device__ Triangle(Vec3 p1,Vec3 p2,Vec3 p3, Quaternion CFrame, Material material = Material(Color3(200,200,200)));
+        __host__ __device__ Triangle(Vec3 p1,Vec3 p2,Vec3 p3, Material material = Material(Vec3(200,200,200)));
+        __host__ __device__ Triangle(Vec3 p1,Vec3 p2,Vec3 p3, Quaternion CFrame, Material material = Material(Vec3(200,200,200)));
         __host__ __device__ const Vec3& getNorm() const;
-        __host__ __device__ void setColor(uint8_t r, uint8_t g, uint8_t b);
-        __host__ __device__ void setColor(Color3 color);
-        __host__ __device__ const Color3& getColor() const;
         __host__ __device__ const Material& getMaterial() const;
         __host__ __device__ void updatePos(Vec3& Diff);
         __host__ __device__ float getMinX() const;

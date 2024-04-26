@@ -41,7 +41,6 @@ Triangle* BVHTree::getTrisFromObjVec(std::vector<Object>& objects) const {
             ind += 1;
         }
     }
-
     return Tris;
 }
 
@@ -78,9 +77,7 @@ void BVHTree::UpdateNodeBounds(uint nodeIdx) {
     node.aabbMin =  Vec3(1e30f,1e30f,1e30f);
     node.aabbMax =  Vec3(-1e30f,-1e30f,-1e30f);
 
-    uint first = node.firstPrim;
-
-    for (uint i = 0; i < node.primCount; i++)
+    for (uint first = node.firstPrim, i = 0; i < node.primCount; i++)
     {
         uint Ind = this->TriIndexes[first + i];
         Triangle& leafTri = this->Tris[Ind];
@@ -162,11 +159,12 @@ __host__ __device__ void IntersectBVH(Ray& ray, BVHNode*& Tree, Triangle*& Tris,
     //printf("AAB: %f, %f, %f, %d\n",node.aabbMin.getX(),node.aabbMin.getY(),node.aabbMin.getZ(), node.primCount);
     //printf("RAY: %f, %f, %f\n",ray.getPos().getX(),ray.getPos().getY(),ray.getPos().getZ());
     if (!IntersectAABB( ray, node.aabbMin, node.aabbMax )){
-        //printf("RAN4\n");
+        //printf("AAB: %f, %f, %f, %d\n",node.aabbMin.getX(),node.aabbMin.getY(),node.aabbMin.getZ(), node.primCount);
+        //printf("RAY: %f, %f, %f\n",ray.getPos().getX(),ray.getPos().getY(),ray.getPos().getZ());
         return;
     }
     if (node.isLeaf())
-    {
+    {   
         for (uint i = 0; i < node.primCount; i++ ) {
             IntersectTri(ray, Tris[TriIndexes[node.firstPrim + i]], TriIndexes[node.firstPrim + i]);
         }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdint>
 
 #pragma once
 
@@ -39,6 +40,7 @@ class Vec3 {
 
         __host__ __device__ float dot(const Vec3& other) const;
         __host__ __device__ Vec3 cross(const Vec3& other) const;
+        __host__ __device__ uint32_t toUint32() const;
 
         friend std::ostream& operator<<(std::ostream& os, const Vec3& vec);
 };
