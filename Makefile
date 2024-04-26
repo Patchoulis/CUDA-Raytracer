@@ -7,7 +7,7 @@ INC_DIRS=/usr/local/cuda-${CUDA_VERSION}/include
 INC=$(foreach d, $(INC_DIRS), -I$d)
 CUDAFLAGS = -dc $(INC) -std=c++11
 
-OBJS = Engine.o viewport.o quaternion.o Vec3.o camera.o ray.o object.o triangle.o world.o user.o color3.o material.o pointlight.o
+OBJS = Engine.o viewport.o quaternion.o Vec3.o camera.o ray.o object.o triangle.o world.o user.o material.o pointlight.o BVH.o
 EXECUTABLE = Engine
 
 default: $(EXECUTABLE)

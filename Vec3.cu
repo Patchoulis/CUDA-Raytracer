@@ -54,6 +54,25 @@ __host__ __device__ Vec3 Vec3::operator-() const {
     return Vec3(-this->x, -this->y, -this->z);
 }
 
+__host__ __device__ float& Vec3::operator[](const uint& other) {
+    if (other == 0) {
+        return this->x;
+    }
+    if (other == 1) {
+        return this->y;
+    }
+    return this->z;
+}
+
+__host__ __device__ const float& Vec3::operator[](const uint& other) const {
+    if (other == 0) {
+        return this->x;
+    }
+    if (other == 1) {
+        return this->y;
+    }
+    return this->z;
+}
 
 __host__ __device__ Vec3& Vec3::operator+=(const float other) {
     this->x+=other;
@@ -110,15 +129,15 @@ __host__ __device__ Vec3 Vec3::cross(const Vec3& other) const {
     return Vec3(this->y*other.getZ() - this->z*other.getY(), this->z*other.getX()-this->x*other.getZ(),this->x*other.getY()-this->y*other.getX());
 }
 
-__host__ __device__ float Vec3::getX() const {
+__host__ __device__ const float& Vec3::getX() const {
     return this->x;
 }
 
-__host__ __device__ float Vec3::getY() const {
+__host__ __device__ const float& Vec3::getY() const {
     return this->y;
 }
 
-__host__ __device__ float Vec3::getZ() const {
+__host__ __device__ const float& Vec3::getZ() const {
     return this->z;
 }
 
@@ -132,4 +151,11 @@ __host__ __device__ void Vec3::setY(float y) {
 
 __host__ __device__ void Vec3::setZ(float z) {
     this->z = z;
+}
+
+__host__ __device__ uint32_t Vec3::toUint32() const {
+    uint32_t x = static_cast<uint8_t>(max(0.0f,min(255.0f,this->x)));
+    uint32_t y = static_cast<uint8_t>(max(0.0f,min(255.0f,this->y)));
+    uint32_t z = static_cast<uint8_t>(max(0.0f,min(255.0f,this->z)));
+    return (x << 24) | (y << 16) | (z << 8) | static_cast<uint32_t>(255);
 }
