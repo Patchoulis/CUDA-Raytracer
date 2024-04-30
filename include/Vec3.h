@@ -44,3 +44,5 @@ class Vec3 {
 
         friend std::ostream& operator<<(std::ostream& os, const Vec3& vec);
 };
+
+typedef Vec3 Color3;

@@ -8,13 +8,6 @@
 
 #define EPSILON 0.00001
 
-struct RayIntersectResult {
-    bool hit;
-    float t;
-    float u;
-    float v;
-};
-
 class Sphere {
     private:
         Vec3 Pos;

@@ -33,4 +33,5 @@ class Triangle {
         __host__ __device__ const Vec3& getGlobalV3() const;
 
         __host__ __device__ const Vec3& getCentroid() const;
+        __host__ __device__ RayIntersectResult rayIntersect(Ray ray);
 };

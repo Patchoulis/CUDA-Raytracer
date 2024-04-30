@@ -1,7 +1,12 @@
 #pragma once
 #include "Vec3.h"
 
-struct RayIntersectResult;
+struct RayIntersectResult {
+    bool hit;
+    float t;
+    float u;
+    float v;
+};
 
 class Ray {
     public:
