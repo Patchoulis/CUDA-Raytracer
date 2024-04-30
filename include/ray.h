@@ -2,12 +2,7 @@
 
 #pragma once
 
-struct RayIntersectResult {
-    uint hit;
-    float t;
-    float u;
-    float v;
-};
+struct RayIntersectResult;
 
 class Ray {
     public:

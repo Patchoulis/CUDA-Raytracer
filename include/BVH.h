@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Vec3.h"
 #include "object.h"
 #include "ray.h"
@@ -5,8 +7,6 @@
 #include "triangle.h"
 #include <utility>
 #include <vector>
-
-#pragma once
 
 #define EPSILON 0.00001
 

@@ -69,5 +69,6 @@
         "format": "cpp",
         "__nullptr": "cpp",
         "__locale": "cpp"
-    }
+    },
+    "C_Cpp.default.compilerPath": "/usr/local/cuda-12.4/bin/nvcc"
 }
