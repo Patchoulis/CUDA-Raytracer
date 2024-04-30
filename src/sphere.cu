@@ -1,6 +1,7 @@
 #include "sphere.h"
 #include <cmath>
 #include <iostream>
+#include <triangle.h>
 
 __host__ __device__ Sphere::Sphere(Vec3 Pos, Material material) : Pos(Pos), material(material) {}
 

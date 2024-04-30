@@ -1,6 +1,7 @@
+#pragma once
+
 #include "Vec3.h"
 
-#pragma once
 
 class Material {
     public:

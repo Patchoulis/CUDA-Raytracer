@@ -1,9 +1,9 @@
+#pragma once
+
 #include "quaternion.h"
 #include "world.h"
 #include "BVH.h"
 #include "viewport.h"
-
-#pragma once
 
 class CameraViewport {
     public:

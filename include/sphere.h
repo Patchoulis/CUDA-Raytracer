@@ -1,10 +1,10 @@
+#pragma once
+
 #include "Vec3.h"
 #include "ray.h"
 #include "material.h"
 #include "quaternion.h"
 #include <utility>
-
-#pragma once
 
 #define EPSILON 0.00001
 

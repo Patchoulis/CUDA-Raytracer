@@ -1,6 +1,7 @@
+#pragma once
+
 #include <SDL2/SDL.h>
 
-#pragma once
 
 class Viewport {
     private:

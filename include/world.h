@@ -1,9 +1,9 @@
+#pragma once
+
 #include "object.h"
 #include "pointlight.h"
 #include "BVH.h"
 #include <vector>
-
-#pragma once
 
 class World {
     public:

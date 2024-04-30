@@ -1,8 +1,8 @@
+#pragma once
+
 #include "triangle.h"
 #include "quaternion.h"
 #include <vector>
-
-#pragma once
 
 class Object {
     public:

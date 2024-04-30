@@ -1,7 +1,7 @@
+#pragma once
+
 #include <iostream>
 #include <cstdint>
-
-#pragma once
 
 class Vec3 {
     private:

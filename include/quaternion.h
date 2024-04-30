@@ -1,6 +1,6 @@
-#include "Vec3.h"
-
 #pragma once
+
+#include "Vec3.h"
 
 class Quaternion {
 private:

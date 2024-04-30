@@ -1,6 +1,5 @@
-#include "Vec3.h"
-
 #pragma once
+#include "Vec3.h"
 
 struct RayIntersectResult;
 
