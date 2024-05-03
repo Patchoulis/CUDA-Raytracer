@@ -2,7 +2,7 @@
 #include "Vec3.h"
 
 struct RayIntersectResult {
-    bool hit;
+    uint hit;
     float t;
     float u;
     float v;
