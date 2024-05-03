@@ -12,7 +12,6 @@ BVHTree::BVHTree(std::vector<Object>& objects) : Tris(this->getTrisFromObjVec(ob
     for (uint i = 0; i < this->TriCount; i++) {
         this->TriIndexes[i] = i;
     }
-    this->Tree[this->rootIndex] = BVHNode{};
     this->Tree[this->rootIndex].leftChild = 0;
     this->Tree[this->rootIndex].firstPrim = 0;
     this->Tree[this->rootIndex].primCount = this->TriCount;
@@ -177,21 +176,21 @@ __host__ __device__ void IntersectBVH(Ray& ray, BVHNode*& Tree, Triangle*& Tris,
 }
 
 __host__ __device__ bool IntersectAABB(const Ray& ray, const Vec3& bmin, const Vec3& bmax) {
-    float tx1 = (bmin.getX() - ray.getPos().getX());
-    float tx2 = (bmax.getX() - ray.getPos().getX());
+    float tx1 = (bmin.getX() - ray.getPos().getX())/ray.getDirection().getX();
+    float tx2 = (bmax.getX() - ray.getPos().getX())/ray.getDirection().getX();
     //printf("TEST: %f, %f\n",tx1,ray.getPos().getX());
 
     float tmin = min( tx1, tx2 );
     float tmax = max( tx1, tx2 );
 
-    float ty1 = (bmin.getY() - ray.getPos().getY());
-    float ty2 = (bmax.getY() - ray.getPos().getY());
+    float ty1 = (bmin.getY() - ray.getPos().getY())/ray.getDirection().getY();
+    float ty2 = (bmax.getY() - ray.getPos().getY())/ray.getDirection().getY();
 
     tmin = max( tmin, min( ty1, ty2 ));
     tmax = min( tmax, max( ty1, ty2 ));
 
-    float tz1 = (bmin.getZ() - ray.getPos().getZ());
-    float tz2 = (bmax.getZ() - ray.getPos().getZ());
+    float tz1 = (bmin.getZ() - ray.getPos().getZ())/ray.getDirection().getZ();
+    float tz2 = (bmax.getZ() - ray.getPos().getZ())/ray.getDirection().getZ();
 
     tmin = max( tmin, min( tz1, tz2 ));
     tmax = min( tmax, max( tz1, tz2 ));
