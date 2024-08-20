@@ -9,8 +9,8 @@ PointLight* getDevicePointLights(std::vector<PointLight> PointLights) {
     return devicePointLights;
 }
 
-World::World(std::vector<Object> Renderable, std::vector<PointLight> PointLights) : Tree(BVHTree(Renderable)), Tris(this->Tree.createDeviceTris()), TriIndexes(this->Tree.createDeviceTriIndexes()),
-    BVHNodes(this->Tree.createDeviceBVHNodes()), PointLights(getDevicePointLights(PointLights)), LightCount(PointLights.size()) {}
+World::World(std::vector<Object> Renderable, std::vector<PointLight> PointLights, Skybox& skybox) : Tree(BVHTree(Renderable)), Tris(this->Tree.createDeviceTris()), TriIndexes(this->Tree.createDeviceTriIndexes()),
+    BVHNodes(this->Tree.createDeviceBVHNodes()), PointLights(getDevicePointLights(PointLights)), LightCount(PointLights.size()), sky(skybox) {}
 
 World::~World() {
     std::cout << "FREED WORLD\n";

@@ -153,25 +153,26 @@ void BVHTree::Subdivide(uint nodeIdx) {
 
 
 
-__host__ __device__ void IntersectBVH(Ray& ray, BVHNode*& Tree, Triangle*& Tris, uint*& TriIndexes, const uint nodeIdx) {
-    BVHNode& node = Tree[nodeIdx];
-    //printf("AAB: %f, %f, %f, %d\n",node.aabbMin.getX(),node.aabbMin.getY(),node.aabbMin.getZ(), node.primCount);
-    //printf("RAY: %f, %f, %f\n",ray.getPos().getX(),ray.getPos().getY(),ray.getPos().getZ());
-    if (!IntersectAABB( ray, node.aabbMin, node.aabbMax )){
-        //printf("AAB: %f, %f, %f, %d\n",node.aabbMin.getX(),node.aabbMin.getY(),node.aabbMin.getZ(), node.primCount);
-        //printf("RAY: %f, %f, %f\n",ray.getPos().getX(),ray.getPos().getY(),ray.getPos().getZ());
-        return;
-    }
-    if (node.isLeaf())
-    {   
-        for (uint i = 0; i < node.primCount; i++ ) {
-            IntersectTri(ray, Tris[TriIndexes[node.firstPrim + i]], TriIndexes[node.firstPrim + i]);
+__host__ __device__ void IntersectBVH(Ray& ray, BVHNode*& Tree, Triangle*& Tris, uint*& TriIndexes) {
+    uint stack[64];
+    uint stackPtr = 0;
+
+    stack[stackPtr++] = 0;
+    while (stackPtr > 0) {
+        uint nodeIdx = stack[--stackPtr];
+        BVHNode& node = Tree[nodeIdx];
+        if (!IntersectAABB( ray, node.aabbMin, node.aabbMax )){
+            continue;
         }
-    }
-    else
-    {
-        IntersectBVH(ray, Tree, Tris, TriIndexes, node.leftChild);
-        IntersectBVH(ray, Tree, Tris, TriIndexes, node.leftChild + 1);
+        if (node.isLeaf())
+        {   
+            for (uint i = 0; i < node.primCount; i++ ) {
+                IntersectTri(ray, Tris[TriIndexes[node.firstPrim + i]], TriIndexes[node.firstPrim + i]);
+            }
+        } else {
+            stack[stackPtr++] = node.leftChild+1;
+            stack[stackPtr++] = node.leftChild;
+        }
     }
 }
 

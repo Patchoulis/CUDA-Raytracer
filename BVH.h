@@ -39,6 +39,6 @@ class BVHTree {
         ~BVHTree();
 };
 
-__host__ __device__ void IntersectBVH(Ray& ray, BVHNode*& Tree, Triangle*& Tris, uint*& TriIndexes, uint nodeIdx = 0);
+__host__ __device__ void IntersectBVH(Ray& ray, BVHNode*& Tree, Triangle*& Tris, uint*& TriIndexes);
 __host__ __device__ bool IntersectAABB(const Ray& ray, const Vec3& bmin, const Vec3& bmax);
 __host__ __device__ void IntersectTri(Ray& ray, const Triangle& tri, const uint instPrim );

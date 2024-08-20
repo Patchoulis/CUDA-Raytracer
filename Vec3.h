@@ -3,11 +3,11 @@
 
 #pragma once
 
-class Vec3 {
+class alignas(16) Vec3 {
     private:
         float x, y, z;
     public:
-        __host__ __device__ Vec3(float x,float y,float z);
+        __host__ __device__ Vec3(float x=0,float y=0,float z=0);
         __host__ __device__ Vec3 unitVector() const;
         __host__ __device__ float magnitude() const;
         __host__ __device__ Vec3 operator+(const Vec3& other) const;
@@ -43,4 +43,5 @@ class Vec3 {
         __host__ __device__ uint32_t toUint32() const;
 
         friend std::ostream& operator<<(std::ostream& os, const Vec3& vec);
+        friend __device__ void atomicAddVec3(Vec3& address, const Vec3& val);
 };

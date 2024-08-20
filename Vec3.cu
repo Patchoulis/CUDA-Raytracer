@@ -44,7 +44,7 @@ __host__ __device__ Vec3 Vec3::operator/(const float other) const {
 }
 
 __host__ __device__ Vec3 Vec3::operator/(const Vec3& other) const {
-    if (other.getZ() == 0 || other.getZ() == 0 || other.getZ() == 0) {
+    if (other.getX() == 0 || other.getY() == 0 || other.getZ() == 0) {
         return *this;
     }
     return Vec3(this->x / other.getX(), this->y / other.getY(), this->z / other.getZ());
@@ -158,4 +158,10 @@ __host__ __device__ uint32_t Vec3::toUint32() const {
     uint32_t y = static_cast<uint8_t>(max(0.0f,min(255.0f,this->y)));
     uint32_t z = static_cast<uint8_t>(max(0.0f,min(255.0f,this->z)));
     return (x << 24) | (y << 16) | (z << 8) | static_cast<uint32_t>(255);
+}
+
+__device__ void atomicAddVec3(Vec3& address, const Vec3& val) {
+    atomicAdd(&(address.x), val.x);
+    atomicAdd(&(address.y), val.y);
+    atomicAdd(&(address.z), val.z);
 }
