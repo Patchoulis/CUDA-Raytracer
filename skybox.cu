@@ -40,9 +40,9 @@ Skybox::Skybox(const char*& file) : Colors(this->getColorsFromFile(file)), devic
 
 __device__ Vec3& getSkyColor(Vec3& Dir, uint width, uint height, Vec3*& colors) {
     Vec3 unitDir = Dir.unitVector();
-    uint y = round((unitDir.getY()+1) * 0.5 * (height-1));
-    float unitX = unitDir.getX();
-    float unitZ = unitDir.getZ();
+    uint y = round((unitDir.y+1) * 0.5 * (height-1));
+    float unitX = unitDir.x;
+    float unitZ = unitDir.z;
     uint x = round(((atan2(unitZ,unitX)*M_1_PI*0.5+0.5))*(width-1));
     return colors[x + y * width];
 }

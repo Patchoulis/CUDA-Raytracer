@@ -80,14 +80,13 @@ void BVHTree::UpdateNodeBounds(uint nodeIdx) {
     {
         uint Ind = this->TriIndexes[first + i];
         Triangle& leafTri = this->Tris[Ind];
-        node.aabbMin.setX(min( node.aabbMin.getX(), leafTri.getMinX() ));
-        node.aabbMin.setY(min( node.aabbMin.getY(), leafTri.getMinY() ));
-        node.aabbMin.setZ(min( node.aabbMin.getZ(), leafTri.getMinZ() ));
+        node.aabbMin.x = min( node.aabbMin.x, leafTri.getMinX() );
+        node.aabbMin.y = min( node.aabbMin.y, leafTri.getMinY() );
+        node.aabbMin.z = min( node.aabbMin.z, leafTri.getMinZ() );
 
-        node.aabbMax.setX(max( node.aabbMax.getX(), leafTri.getMaxX() ));
-        node.aabbMax.setY(max( node.aabbMax.getY(), leafTri.getMaxY() ));
-        node.aabbMax.setZ(max( node.aabbMax.getZ(), leafTri.getMaxZ() ));
-
+        node.aabbMax.x = max( node.aabbMax.x, leafTri.getMaxX() );
+        node.aabbMax.y = max( node.aabbMax.y, leafTri.getMaxY() );
+        node.aabbMax.z = max( node.aabbMax.z, leafTri.getMaxZ() );
     }
 }
 
@@ -104,17 +103,17 @@ void BVHTree::Subdivide(uint nodeIdx) {
         return;
     }
 
-    float extentX = node.aabbMax.getX() - node.aabbMin.getX();
-    float extentY = node.aabbMax.getY() - node.aabbMin.getY();
-    float extentZ = node.aabbMax.getZ() - node.aabbMin.getZ();
+    float extentX = node.aabbMax.x - node.aabbMin.x;
+    float extentY = node.aabbMax.y - node.aabbMin.y;
+    float extentZ = node.aabbMax.z - node.aabbMin.z;
 
     Vec3 extent = Vec3(extentX, extentY, extentZ);
 
     uint axis = 0;
-    if (extent.getY() > extent.getX()) {
+    if (extent.y > extent.x) {
         axis = 1;
     }
-    if ( extent.getZ() > extent[axis] ) {
+    if ( extent.z > extent[axis] ) {
         axis = 2;
     }
     float splitPos = node.aabbMin[axis] + extent[axis] * 0.5f;
@@ -177,21 +176,21 @@ __host__ __device__ void IntersectBVH(Ray& ray, BVHNode*& Tree, Triangle*& Tris,
 }
 
 __host__ __device__ bool IntersectAABB(const Ray& ray, const Vec3& bmin, const Vec3& bmax) {
-    float tx1 = (bmin.getX() - ray.getPos().getX())/ray.getDirection().getX();
-    float tx2 = (bmax.getX() - ray.getPos().getX())/ray.getDirection().getX();
-    //printf("TEST: %f, %f\n",tx1,ray.getPos().getX());
+    float tx1 = (bmin.x - ray.getPos().x)/ray.getDirection().x;
+    float tx2 = (bmax.x - ray.getPos().x)/ray.getDirection().x;
+    //printf("TEST: %f, %f\n",tx1,ray.getPos().x);
 
     float tmin = min( tx1, tx2 );
     float tmax = max( tx1, tx2 );
 
-    float ty1 = (bmin.getY() - ray.getPos().getY())/ray.getDirection().getY();
-    float ty2 = (bmax.getY() - ray.getPos().getY())/ray.getDirection().getY();
+    float ty1 = (bmin.y - ray.getPos().y)/ray.getDirection().y;
+    float ty2 = (bmax.y - ray.getPos().y)/ray.getDirection().y;
 
     tmin = max( tmin, min( ty1, ty2 ));
     tmax = min( tmax, max( ty1, ty2 ));
 
-    float tz1 = (bmin.getZ() - ray.getPos().getZ())/ray.getDirection().getZ();
-    float tz2 = (bmax.getZ() - ray.getPos().getZ())/ray.getDirection().getZ();
+    float tz1 = (bmin.z - ray.getPos().z)/ray.getDirection().z;
+    float tz2 = (bmax.z - ray.getPos().z)/ray.getDirection().z;
 
     tmin = max( tmin, min( tz1, tz2 ));
     tmax = min( tmax, max( tz1, tz2 ));
@@ -203,15 +202,15 @@ __host__ __device__ bool IntersectAABB(const Ray& ray, const Vec3& bmin, const V
 
 
 __host__ __device__ void IntersectTri(Ray& ray, const Triangle& tri, const uint instPrim ) {
-	const Vec3 edge1 = tri.getGlobalV2() - tri.getGlobalV1();
-	const Vec3 edge2 = tri.getGlobalV3() - tri.getGlobalV1();
+	const Vec3 edge1 = tri.p2 - tri.p1;
+	const Vec3 edge2 = tri.p3 - tri.p1;
 	const Vec3 h = ray.getDirection().cross(edge2);
 	const float a = edge1.dot(h);
 	if (a < EPSILON) {
         return;
     }
 	const float f = 1 / a;
-	const Vec3 s = ray.getPos() - tri.getGlobalV1();
+	const Vec3 s = ray.getPos() - tri.p1;
 	const float u = s.dot(h) * f;
 	if (u < 0 || u > 1) {
         return;

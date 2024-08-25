@@ -4,9 +4,8 @@
 #pragma once
 
 class alignas(16) Vec3 {
-    private:
-        float x, y, z;
     public:
+        float x, y, z;
         __host__ __device__ Vec3(float x=0,float y=0,float z=0);
         __host__ __device__ Vec3 unitVector() const;
         __host__ __device__ float magnitude() const;
@@ -29,14 +28,6 @@ class alignas(16) Vec3 {
 
         __host__ __device__ float& operator[](const uint& other);
         __host__ __device__ const float& operator[](const uint& other) const;
-
-        __host__ __device__ const float& getX() const;
-        __host__ __device__ const float& getY() const;
-        __host__ __device__ const float& getZ() const;
-
-        __host__ __device__ void setX(float x);
-        __host__ __device__ void setY(float y);
-        __host__ __device__ void setZ(float z);
 
         __host__ __device__ float dot(const Vec3& other) const;
         __host__ __device__ Vec3 cross(const Vec3& other) const;

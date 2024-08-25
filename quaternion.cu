@@ -48,9 +48,9 @@ __host__ __device__ Quaternion& Quaternion::operator+=(const Vec3& other) {
 
 __host__ __device__ Quaternion& Quaternion::rotate(const Vec3& other, double deg) {
     Vec3 UnitVec = other.unitVector();
-    float ux = UnitVec.getX();
-    float uy = UnitVec.getY();
-    float uz = UnitVec.getZ();
+    float ux = UnitVec.x;
+    float uy = UnitVec.y;
+    float uz = UnitVec.z;
 
     float angleCos = cos(deg);
     float angleSin = sin(deg);

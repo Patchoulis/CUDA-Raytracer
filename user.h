@@ -50,7 +50,7 @@ class User {
         Configs config;
         Viewport screen;
     public:
-        User(Camera &cam, Viewport screen, Configs config = Configs{ MoveUp, MoveDown, MoveForward, MoveBackward, MoveLeft, MoveRight, YPanL, YPanR, XPanU, XPanD, ZPanL, ZPanR, 0.000005, HalfDegree/300});
+        User(Camera &cam, Viewport screen, Configs config = Configs{ MoveUp, MoveDown, MoveForward, MoveBackward, MoveLeft, MoveRight, YPanL, YPanR, XPanU, XPanD, ZPanL, ZPanR, 0.00005, HalfDegree/15});
         void ProcessMovement();
         void setConfigs(Configs config);
         const Configs& getConfigs() const;

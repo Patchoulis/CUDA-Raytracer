@@ -6,8 +6,8 @@
 // Temporary 
 #define MAXDIST 60
 #define AMBIENT Vec3(0.4,0.4,0.4)
-#define MAXBOUNCES 3
-#define SAMPLES 60
+#define MAXBOUNCES 2
+#define SAMPLES 1
 #define THREADSPERBLOCK 32
 
 __global__ void setup_rand_state(curandState *state, uint Width, uint Height, unsigned long seed) {
@@ -18,6 +18,7 @@ __global__ void setup_rand_state(curandState *state, uint Width, uint Height, un
     if (X >= Width || Y >= Height) return;
     curand_init(seed, index, 0, &state[index]);
 }
+
 
 void Camera::setup(uint Width, uint Height) {
     std::cout << "CREATING A CAMERA \n";
@@ -120,15 +121,15 @@ __device__ Vec3 SpecSample(const Vec3& V, curandState& randState, const Triangle
     const Material& mat = tri.getMaterial();
     float roughness = mat.Roughness;
 
-    const Vec3& N = tri.getNorm();
-    Vec3 XAxis = (tri.getGlobalV1()-tri.getGlobalV2()).unitVector();
+    const Vec3& N = tri.norm;
+    Vec3 XAxis = (tri.p1-tri.p2).unitVector();
     Vec3 ZAxis = N.cross(XAxis);
     Vec3 wo = -Vec3(XAxis.dot(V)*roughness,N.dot(V),ZAxis.dot(V)*roughness).unitVector();
 
-    Vec3 T1 = (wo.getY() < 0.9999) ? wo.cross(Vec3(0,1,0)) : Vec3(1,0,0);
+    Vec3 T1 = (wo.y < 0.9999) ? wo.cross(Vec3(0,1,0)) : Vec3(1,0,0);
     Vec3 T2 = T1.cross(wo);
 
-    float a = 1.0f / (1.0f + wo.getY());
+    float a = 1.0f / (1.0f + wo.y);
 
     float rand1 = curand_uniform(&randState);
     float rand2 = curand_uniform(&randState);
@@ -136,16 +137,16 @@ __device__ Vec3 SpecSample(const Vec3& V, curandState& randState, const Triangle
     
     float phi = (rand2 < a) ? rand2/a * M_PI : M_PI + (rand2-a)/(1.0f-a) * M_PI;
     float P1 = r * cos(phi);
-    float P2 = r * sin(phi) * ((rand2<a) ? 1.0 : wo.getY());
+    float P2 = r * sin(phi) * ((rand2<a) ? 1.0 : wo.y);
 
     Vec3 n = T1*P1+T2*P2+wo*sqrt(max(0.0f,1.0f-P1*P1-P2*P2));
 
-    return (XAxis * roughness * n.getX() + ZAxis * roughness * n.getZ() + N * max(0.0f,n.getY())).unitVector();
+    return (XAxis * roughness * n.x + ZAxis * roughness * n.z + N * max(0.0f,n.y)).unitVector();
 }
 
 __device__ Vec3 DiffuseSample(curandState& randState, const Triangle& tri) {
-    const Vec3& N = tri.getNorm();
-    Vec3 XAxis = (tri.getGlobalV1()-tri.getGlobalV2()).unitVector();
+    const Vec3& N = tri.norm;
+    Vec3 XAxis = (tri.p1-tri.p2).unitVector();
     Vec3 ZAxis = N.cross(XAxis);
 
     float rand1 = curand_uniform(&randState);
@@ -158,7 +159,7 @@ __device__ Vec3 DiffuseSample(curandState& randState, const Triangle& tri) {
 
     Vec3 n = Vec3(x,max(0.0f,sqrt(1-rand1)),y).unitVector();
 
-    return (XAxis * n.getX() + ZAxis * n.getZ() + N * n.getY());
+    return (XAxis * n.x + ZAxis * n.z + N * n.y);
 }
 
 
@@ -255,7 +256,7 @@ int idx = id * SAMPLES + blockIdx.y;
 
         RenderRay = Ray(Pos, -RenderRay.getDirection() + N * N.dot(RenderRay.getDirection()) * 2);
         Result = mat.Emissivity * a;
-        printf("COLOR: %f %f %f",mat.Emissivity.getX(),mat.Emissivity.getY(),mat.Emissivity.getZ());
+        printf("COLOR: %f %f %f",mat.Emissivity.x,mat.Emissivity.y,mat.Emissivity.z);
         a = (mat.Diffuse * Kd + cookTorrence);
         IntersectBVH(RenderRay, tree, tris, triIndexes);
         if (!RenderRay.hasHit()) {
@@ -366,11 +367,11 @@ __global__ void rayTraceKernel(CameraViewport* View, BVHNode* tree, Triangle* tr
                     Pos = RenderRay.getPos() + RenderRay.getDirection() * RenderRay.hit.t;
 
                     const Material& mat = hitTri.getMaterial();
-                    const Vec3& N = hitTri.getNorm();
+                    const Vec3& N = hitTri.norm;
                     
                     NewNorm = DiffuseSample(d_randStates[index],hitTri);
                     
-                    Ks = Fresnel(mat.F0, -V, NewNorm);
+                    Ks = Fresnel(mat.F0, -V, N);
                     Kd = Vec3(1.0f,1.0f,1.0f) - Ks;
 
                     RenderRay = Ray(Pos, NewNorm);
@@ -378,13 +379,13 @@ __global__ void rayTraceKernel(CameraViewport* View, BVHNode* tree, Triangle* tr
                     a = (mat.Diffuse * Kd);
                     IntersectBVH(RenderRay, tree, tris, triIndexes);
                     if (!RenderRay.hasHit()) {
-                        atomicAddVec3(d_Light[index], (Result + a * AMBIENT)/SAMPLES);
+                        d_Light[index] += (Result + a * AMBIENT)/SAMPLES;
                         break;
                     } else {
-                        atomicAddVec3(d_Light[index], Result/SAMPLES);
+                        d_Light[index] += Result/SAMPLES;
                     }
                 }
-
+                /*
                 RenderRay = OriginalRay;
                 for (uint i = 0; i < 1; i++) {
                     V = RenderRay.getDirection();
@@ -392,7 +393,7 @@ __global__ void rayTraceKernel(CameraViewport* View, BVHNode* tree, Triangle* tr
                     Pos = RenderRay.getPos() + RenderRay.getDirection() * RenderRay.hit.t;
 
                     const Material& mat = hitTri.getMaterial();
-                    const Vec3& N = hitTri.getNorm();
+                    const Vec3& N = hitTri.norm;
                     
                     NewNorm = SpecSample(V,d_randStates[index],hitTri);
                     
@@ -408,7 +409,7 @@ __global__ void rayTraceKernel(CameraViewport* View, BVHNode* tree, Triangle* tr
                     } else {
                         atomicAddVec3(d_Light[index], (Result * mat.Emissivity)/SAMPLES);
                     }
-                }
+                } */
             }
         
         #endif

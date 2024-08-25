@@ -4,29 +4,6 @@
 
 __host__ __device__ Sphere::Sphere(Vec3 Pos, Material material) : Pos(Pos), material(material) {}
 
-__host__ __device__ Vec3 Triangle::calcNorm(Vec3 Center) const {
-    Vec3 borderOne = this->p3 - this->p1;
-    Vec3 borderTwo = this->p3 - this->p2;
-
-    Vec3 NormDir = (this->p3 + this->p2 + this->p1)/3.0f - Center;
-    Vec3 Norm = borderOne.cross(borderTwo).unitVector();
-    //std::cout << this->p1 << this->p2 << this->p3 << NormDir.dot(Norm) << Center << NormDir << " " << Norm << "\n";
-    if (NormDir.dot(Norm) < 0) {
-        return -Norm;
-    }
-    return Norm;
-}
-
-__host__ __device__ const Vec3& Triangle::getNorm() const {
-    return this->norm;
-}
-
-__host__ __device__ void Triangle::updatePos(Vec3& Diff) {
-    this->p1 += Diff;
-    this->p2 += Diff;
-    this->p3 += Diff;
-}
-
 __host__ __device__ const Color3& Triangle::getColor() const {
     return this->material.getColor();
 }
