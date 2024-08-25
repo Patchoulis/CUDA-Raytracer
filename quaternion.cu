@@ -3,19 +3,19 @@
 
 __host__ __device__ Quaternion::Quaternion(Vec3 Pos, Vec3 Up, Vec3 Right, Vec3 Look) : Pos(Pos), Up(Up), Right(Right), Look(Look) {}
 
-__host__ __device__ Vec3 Quaternion::getPos() const{
+__host__ __device__ const Vec3& Quaternion::getPos() const{
     return this->Pos;
 }
 
-__host__ __device__ Vec3 Quaternion::getRightVector() const{
+__host__ __device__ const Vec3& Quaternion::getRightVector() const{
     return this->Right;
 }
 
-__host__ __device__ Vec3 Quaternion::getUpVector() const{
+__host__ __device__ const Vec3& Quaternion::getUpVector() const{
     return this->Up;
 }
 
-__host__ __device__ Vec3 Quaternion::getLookVector() const{
+__host__ __device__ const Vec3& Quaternion::getLookVector() const{
     return this->Look;
 }
 
@@ -48,9 +48,9 @@ __host__ __device__ Quaternion& Quaternion::operator+=(const Vec3& other) {
 
 __host__ __device__ Quaternion& Quaternion::rotate(const Vec3& other, double deg) {
     Vec3 UnitVec = other.unitVector();
-    float ux = UnitVec.getX();
-    float uy = UnitVec.getY();
-    float uz = UnitVec.getZ();
+    float ux = UnitVec.x;
+    float uy = UnitVec.y;
+    float uz = UnitVec.z;
 
     float angleCos = cos(deg);
     float angleSin = sin(deg);

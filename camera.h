@@ -1,6 +1,9 @@
 #include "quaternion.h"
 #include "world.h"
+#include "BVH.h"
 #include "viewport.h"
+#include "Vec2.h"
+#include <curand_kernel.h>
 
 #pragma once
 
@@ -18,11 +21,13 @@ class CameraViewport {
 class Camera {
     private:
         Quaternion CFrame;
+        void setup(uint Width, uint Height);
     public:
         int ViewWidth, ViewHeight, fromOrigin;
         float FOV;
         CameraViewport View;
         World* world;
+        curandState *d_randStates;
 
         Camera(World* world, Vec3 Pos,int ViewWidth,int ViewHeight,int fromOrigin, float FOV);
         Camera(World* world, Quaternion Coords,int ViewWidth,int ViewHeight,int fromOrigin, float FOV);
@@ -33,4 +38,5 @@ class Camera {
         Quaternion& move(const Vec3& other);
         void resetView();
         void raytrace(Viewport& screen);
+        ~Camera();
 };

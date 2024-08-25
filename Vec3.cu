@@ -4,8 +4,8 @@
 __host__ __device__ Vec3::Vec3(float x,float y,float z) : x(x), y(y), z(z){}
 
 __host__ __device__ Vec3 Vec3::unitVector() const {
-    float magn = this->magnitude();
-    return Vec3(this->x/magn, this->y/magn, this->z/magn);
+    float magnInv = 1/this->magnitude();
+    return Vec3(this->x * magnInv, this->y * magnInv, this->z * magnInv);
 }
 
 __host__ __device__ float Vec3::magnitude() const {
@@ -13,7 +13,7 @@ __host__ __device__ float Vec3::magnitude() const {
 }
 
 __host__ __device__ Vec3 Vec3::operator+(const Vec3& other) const {
-    return Vec3(this->x + other.getX(), this->y + other.getY(), this->z + other.getZ());
+    return Vec3(this->x + other.x, this->y + other.y, this->z + other.z);
 }
 
 __host__ __device__ Vec3 Vec3::operator+(const float other) const {
@@ -21,7 +21,7 @@ __host__ __device__ Vec3 Vec3::operator+(const float other) const {
 }
 
 __host__ __device__ Vec3 Vec3::operator-(const Vec3& other) const {
-    return Vec3(this->x - other.getX(), this->y - other.getY(), this->z - other.getZ());
+    return Vec3(this->x - other.x, this->y - other.y, this->z - other.z);
 }
 
 __host__ __device__ Vec3 Vec3::operator-(const float other) const {
@@ -33,7 +33,7 @@ __host__ __device__ Vec3 Vec3::operator*(const float other) const {
 }
 
 __host__ __device__ Vec3 Vec3::operator*(const Vec3& other) const {
-    return Vec3(this->x * other.getX(), this->y * other.getY(), this->z * other.getZ());
+    return Vec3(this->x * other.x, this->y * other.y, this->z * other.z);
 }
 
 __host__ __device__ Vec3 Vec3::operator/(const float other) const {
@@ -44,16 +44,35 @@ __host__ __device__ Vec3 Vec3::operator/(const float other) const {
 }
 
 __host__ __device__ Vec3 Vec3::operator/(const Vec3& other) const {
-    if (other.getZ() == 0 || other.getZ() == 0 || other.getZ() == 0) {
+    if (other.x == 0 || other.y == 0 || other.z == 0) {
         return *this;
     }
-    return Vec3(this->x / other.getX(), this->y / other.getY(), this->z / other.getZ());
+    return Vec3(this->x / other.x, this->y / other.y, this->z / other.z);
 }
 
 __host__ __device__ Vec3 Vec3::operator-() const {
     return Vec3(-this->x, -this->y, -this->z);
 }
 
+__host__ __device__ float& Vec3::operator[](const uint& other) {
+    if (other == 0) {
+        return this->x;
+    }
+    if (other == 1) {
+        return this->y;
+    }
+    return this->z;
+}
+
+__host__ __device__ const float& Vec3::operator[](const uint& other) const {
+    if (other == 0) {
+        return this->x;
+    }
+    if (other == 1) {
+        return this->y;
+    }
+    return this->z;
+}
 
 __host__ __device__ Vec3& Vec3::operator+=(const float other) {
     this->x+=other;
@@ -63,9 +82,9 @@ __host__ __device__ Vec3& Vec3::operator+=(const float other) {
 }
 
 __host__ __device__ Vec3& Vec3::operator+=(const Vec3& other) {
-    this->x+=other.getX();
-    this->y+=other.getY();
-    this->z+=other.getZ();
+    this->x+=other.x;
+    this->y+=other.y;
+    this->z+=other.z;
     return *this;
 }
 
@@ -77,9 +96,9 @@ __host__ __device__ Vec3& Vec3::operator-=(const float other) {
 }
 
 __host__ __device__ Vec3& Vec3::operator-=(const Vec3& other) {
-    this->x-=other.getX();
-    this->y-=other.getY();
-    this->z-=other.getZ();
+    this->x-=other.x;
+    this->y-=other.y;
+    this->z-=other.z;
     return *this;
 }
 
@@ -91,45 +110,34 @@ __host__ __device__ Vec3& Vec3::operator*=(const float other) {
 }
 
 __host__ __device__ Vec3& Vec3::operator*=(const Vec3& other) {
-    this->x*=other.getX();
-    this->y*=other.getY();
-    this->z*=other.getZ();
+    this->x*=other.x;
+    this->y*=other.y;
+    this->z*=other.z;
     return *this;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vec3& vec) {
-    os << "(" << vec.getX() << ", " << vec.getY() << ", " << vec.getZ() << ")";
+    os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
     return os;
 }
 
 __host__ __device__ float Vec3::dot(const Vec3& other) const {
-    return other.getX()*this->x + other.getY()*this->y + other.getZ()*this->z;
+    return other.x*this->x + other.y*this->y + other.z*this->z;
 }
 
 __host__ __device__ Vec3 Vec3::cross(const Vec3& other) const {
-    return Vec3(this->y*other.getZ() - this->z*other.getY(), this->z*other.getX()-this->x*other.getZ(),this->x*other.getY()-this->y*other.getX());
+    return Vec3(this->y*other.z - this->z*other.y, this->z*other.x-this->x*other.z,this->x*other.y-this->y*other.x);
 }
 
-__host__ __device__ float Vec3::getX() const {
-    return this->x;
+__host__ __device__ uint32_t Vec3::toUint32() const {
+    uint32_t x = static_cast<uint8_t>(max(0.0f,min(255.0f,this->x)));
+    uint32_t y = static_cast<uint8_t>(max(0.0f,min(255.0f,this->y)));
+    uint32_t z = static_cast<uint8_t>(max(0.0f,min(255.0f,this->z)));
+    return (x << 24) | (y << 16) | (z << 8) | static_cast<uint32_t>(255);
 }
 
-__host__ __device__ float Vec3::getY() const {
-    return this->y;
-}
-
-__host__ __device__ float Vec3::getZ() const {
-    return this->z;
-}
-
-__host__ __device__ void Vec3::setX(float x) {
-    this->x = x;
-}
-
-__host__ __device__ void Vec3::setY(float y) {
-    this->y = y;
-}
-
-__host__ __device__ void Vec3::setZ(float z) {
-    this->z = z;
+__device__ void atomicAddVec3(Vec3& address, const Vec3& val) {
+    atomicAdd(&(address.x), val.x);
+    atomicAdd(&(address.y), val.y);
+    atomicAdd(&(address.z), val.z);
 }

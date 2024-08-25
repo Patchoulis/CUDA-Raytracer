@@ -1,35 +1,20 @@
 #include "world.h"
 #include <utility>
 
-World::World(std::vector<Object> Renderable) : Renderable(Renderable), Tris(getTrisFromObjVec(Renderable)) {}
+PointLight* getDevicePointLights(std::vector<PointLight> PointLights) {
+    PointLight* devicePointLights = nullptr;
+    cudaMalloc((void**) &devicePointLights, PointLights.size()* sizeof(PointLight));
+    cudaMemcpy(devicePointLights, PointLights.data(), PointLights.size() * sizeof(PointLight), cudaMemcpyHostToDevice);
 
-std::vector<Triangle> World::getTrisFromObjVec(std::vector<Object>& objects) const {
-    std::vector<Triangle> AllTris;
-    for (const auto& obj : objects) {
-        AllTris.insert(AllTris.end(), obj.Triangles.begin(), obj.Triangles.end());
-    }
-    return AllTris;
+    return devicePointLights;
 }
 
-void World::AddObj(Object newObj) {
-    this->Renderable.push_back(newObj);
-    this->addTris(newObj);
-}
+World::World(std::vector<Object> Renderable, std::vector<PointLight> PointLights, Skybox& skybox) : Tree(BVHTree(Renderable)), Tris(this->Tree.createDeviceTris()), TriIndexes(this->Tree.createDeviceTriIndexes()),
+    BVHNodes(this->Tree.createDeviceBVHNodes()), PointLights(getDevicePointLights(PointLights)), LightCount(PointLights.size()), sky(skybox) {}
 
-void World::AddPointLight(PointLight light) {
-    this->PointLights.push_back(light);
-}
-
-std::pair<const Triangle*,int> World::getTris(Quaternion& Cam) const { // UPDATE SO IT USES OCTREES FOR TRIANGLES OBTAINED
-    return std::make_pair(this->Tris.data(),this->Tris.size());
-}
-
-std::pair<const PointLight*,int> World::getPointLights(Quaternion& Cam) const { // UPDATE SO IT USES OCTREES FOR POINTLIGHTS OBTAINED
-    return std::make_pair(this->PointLights.data(),this->PointLights.size());
-}
-
-void World::addTris(Object& newObj) {
-    for (Triangle tri : newObj.Triangles) {
-        this->Tris.push_back(tri);
-    }
+World::~World() {
+    std::cout << "FREED WORLD\n";
+    cudaFree(this->BVHNodes);
+    cudaFree(this->Tris);
+    cudaFree(this->TriIndexes);
 }

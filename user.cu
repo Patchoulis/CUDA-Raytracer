@@ -1,6 +1,6 @@
 #include "user.h"
 
-User::User(Camera cam, Viewport screen, Configs config) : cam(cam), config(config), screen(screen) {}
+User::User(Camera &cam, Viewport screen, Configs config) : cam(cam), config(config), screen(screen) {}
 
 void User::ProcessMovement() {
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
@@ -74,7 +74,7 @@ Camera& User::getCamera() {
     return this->cam;
 }
 
-void User::setCamera(Camera cam) {
+void User::setCamera(Camera &cam) {
     this->cam = cam;
 }
 

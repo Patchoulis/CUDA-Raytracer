@@ -1,14 +1,19 @@
-#include "color3.h"
+#include "Vec3.h"
+
+#pragma once
 
 class Material {
     public:
-        Color3 color;
-        float Specularity;
-        float Refractivity;
-        float Reflectivity;
-        float Transparency;
-        Material(Color3 color, float Specularity = 0, float Refractivity = 0,float Reflectivity = 0, float Transparency = 0);
-        __host__ __device__ void setColor(uint8_t r, uint8_t g, uint8_t b);
-        __host__ __device__ void setColor(Color3 color);
-        __host__ __device__ const Color3& getColor() const;
+        Vec3 Emissivity;
+        float Roughness;
+        float Reflectance;
+        float Metallic;
+        Vec3 BaseColor;
+        Vec3 Diffuse;
+        Vec3 F0;
+        float ClearCoat;
+        float ClearCoatRoughness;
+        Material(Vec3 Emissivity = Vec3(0,0,0), float Roughness = 0.05, float Reflectance=0.0f, float Metallic=0.9, Vec3 BaseColor = Vec3(0,0,0),float ClearCoat=0, float ClearCoatRoughness=0);
+        Vec3 CalcF0();
+        Vec3 CalcDiffuse();
 };
